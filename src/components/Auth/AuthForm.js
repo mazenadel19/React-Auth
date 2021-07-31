@@ -65,7 +65,7 @@ const AuthForm = () => {
 			.then(data => {
 				//we are using context instead of redux as auth state won't change frequently
 				authCtx.login(data.idToken)
-				history.push('/')
+				history.replace('/')
 			})
 			.catch(err => alert(err.message))
 	}

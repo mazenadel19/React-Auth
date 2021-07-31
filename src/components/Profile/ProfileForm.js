@@ -43,7 +43,7 @@ const ProfileForm = () => {
 			})
 			.then(data => {
 				alert('Password Changed Successfully')
-				history.push('/')
+				history.replace('/')
 			})
 			.catch(err => alert(err.message))
 	}
