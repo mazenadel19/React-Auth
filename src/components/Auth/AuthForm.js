@@ -1,9 +1,12 @@
-import { useRef, useState } from 'react'
+import { useContext, useRef, useState } from 'react'
+import AuthContext from '../../store/auth-context'
 import classes from './AuthForm.module.css'
 
 const AuthForm = () => {
 	const [isLogin, setIsLogin] = useState(true)
 	const [isLoading, setIsLoading] = useState(false)
+
+	const authCtx = useContext(AuthContext)
 
 	const emailInputRef = useRef()
 	const passwordInputRef = useRef()
@@ -18,40 +21,50 @@ const AuthForm = () => {
 		const enteredPassword = passwordInputRef.current.value
 
 		// validation
-
+		let url
 		setIsLoading(true)
 		if (isLogin) {
+			//login
+			url =
+				'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBuB1B6No6ne9783idYQDhpN-NaiKMCqu0'
 		} else {
-			fetch(
-				'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBuB1B6No6ne9783idYQDhpN-NaiKMCqu0',
-				{
-					method: 'POST',
-					body: JSON.stringify({
-						email: enteredEmail,
-						password: enteredPassword,
-						returnSecureToken: true,
-					}),
-					headers: {
-						'Content-Type': 'application/json',
-					},
-				},
-			).then(res => {
+			//signup
+			url =
+				'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBuB1B6No6ne9783idYQDhpN-NaiKMCqu0'
+		}
+		fetch(url, {
+	 		method: 'POST',
+			body: JSON.stringify({
+				email: enteredEmail,
+				password: enteredPassword,
+				returnSecureToken: true,
+			}),
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		})
+			.then(res => {
 				setIsLoading(false)
 
 				if (res.ok) {
-					//......
-					console.log(res)
+					//signup/login successfully
+					return res.json()
 				} else {
+					//signup/login failed
 					return res.json().then(data => {
 						let errorMsg = 'Authentication Failed'
 						if (data && data.error && data.error.message) {
 							errorMsg = data.error.message
 						}
-						alert(errorMsg)
+						throw new Error(errorMsg)
 					})
 				}
 			})
-		}
+			.then(data => {
+				//we are using context instead of redux as auth state won't change ofter
+				authCtx.login(data.idToken)
+			})
+			.catch(err => alert(err.message))
 	}
 
 	return (
@@ -75,9 +88,7 @@ const AuthForm = () => {
 					{!isLoading && (
 						<button>{isLogin ? 'Login' : 'Create Account'}</button>
 					)}
-					{isLoading && (
-						<button disabled>Sending Request</button>
-					)}
+					{isLoading && <button disabled>Sending Request</button>}
 					<button
 						type='button'
 						className={classes.toggle}
