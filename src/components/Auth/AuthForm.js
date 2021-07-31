@@ -1,10 +1,12 @@
 import { useContext, useRef, useState } from 'react'
+import { useHistory } from 'react-router-dom'
 import AuthContext from '../../store/auth-context'
 import classes from './AuthForm.module.css'
 
 const AuthForm = () => {
 	const [isLogin, setIsLogin] = useState(true)
 	const [isLoading, setIsLoading] = useState(false)
+	const history = useHistory()
 
 	const authCtx = useContext(AuthContext)
 
@@ -33,7 +35,7 @@ const AuthForm = () => {
 				'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBuB1B6No6ne9783idYQDhpN-NaiKMCqu0'
 		}
 		fetch(url, {
-	 		method: 'POST',
+			method: 'POST',
 			body: JSON.stringify({
 				email: enteredEmail,
 				password: enteredPassword,
@@ -61,8 +63,9 @@ const AuthForm = () => {
 				}
 			})
 			.then(data => {
-				//we are using context instead of redux as auth state won't change ofter
+				//we are using context instead of redux as auth state won't change frequently
 				authCtx.login(data.idToken)
+				history.push('/')
 			})
 			.catch(err => alert(err.message))
 	}
