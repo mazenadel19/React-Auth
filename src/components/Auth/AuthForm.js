@@ -63,8 +63,11 @@ const AuthForm = () => {
 				}
 			})
 			.then(data => {
+				const expirationTime = new Date(
+					new Date().getTime() + +data.expiresIn * 1000,
+				)
 				//we are using context instead of redux as auth state won't change frequently
-				authCtx.login(data.idToken)
+				authCtx.login(data.idToken, expirationTime.toISOString())
 				history.replace('/')
 			})
 			.catch(err => alert(err.message))
